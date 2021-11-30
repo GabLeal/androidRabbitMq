@@ -38,9 +38,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-
-//      run("https://api.github.com/users/Evin1-/repos")
-        subscribe("tesouro/11,73%/R\$ 31,74")
+        subscribe("tesouro/11,81%/R\$ 633,36")
     }
 
     fun rawJSON() {
@@ -55,7 +53,7 @@ class MainActivity : AppCompatActivity() {
 
         // Create JSON using JSONObject
         val jsonObject = JSONObject()
-        jsonObject.put("fila", "tesouro/11,59%/R\$ 38,28")
+        jsonObject.put("fila", "tesouro/11,81%/R\$ 633,36")
 
 
         // Convert JSONObject to String
@@ -133,10 +131,10 @@ class MainActivity : AppCompatActivity() {
                         println("[$consumerTag] was canceled")
                     }
                     println(queu)
-                   // while (true) {
-                    channel.basicConsume("tesouro/11,73%/R\$ 31,74", true, deliverCallback, cancelCallback)
+                   while (true) {
+                    channel.basicConsume(queu, true, deliverCallback, cancelCallback)
 
-                   // }
+                   }
                 } catch (e: InterruptedException) {
                     break
                 } catch (e1: Exception) {
