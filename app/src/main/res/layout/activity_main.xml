@@ -16,7 +16,7 @@
         app:layout_constraintRight_toRightOf="parent"
         android:importantForAutofill="no"
         tools:ignore="HardcodedText,InOrMmUsage,LabelFor,TextFields"
-        android:hint="Input1"
+        android:hint="Tipo de Investimento"
         />
 
     <EditText
@@ -29,7 +29,7 @@
         app:layout_constraintRight_toRightOf="parent"
         android:importantForAutofill="no"
         tools:ignore="HardcodedText,InOrMmUsage,LabelFor,TextFields"
-        android:hint="Input2"
+        android:hint="Rentabilidade"
         />
 
     <EditText
@@ -42,7 +42,7 @@
         app:layout_constraintRight_toRightOf="parent"
         android:importantForAutofill="no"
         tools:ignore="HardcodedText,InOrMmUsage,LabelFor,TextFields"
-        android:hint="Input3"
+        android:hint="Prazo"
         />
 
 
