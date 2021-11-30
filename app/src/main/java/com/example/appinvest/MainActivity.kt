@@ -45,7 +45,7 @@ class MainActivity : AppCompatActivity() {
 
         // Create Retrofit
         val retrofit = Retrofit.Builder()
-            .baseUrl("http://172.20.32.1:3000/")
+            .baseUrl("http://172.26.80.1:3000/")
             .build()
 
         // Create Service
@@ -115,7 +115,7 @@ class MainActivity : AppCompatActivity() {
                 try {
 
                     val factory = ConnectionFactory()
-                    factory.host = "172.20.32.1".toString()
+                    factory.host = "172.26.80.1".toString()
 
                     val connection = factory.newConnection("amqp://guest:guest@172.20.32.1:5672/")
                     val channel = connection.createChannel()
