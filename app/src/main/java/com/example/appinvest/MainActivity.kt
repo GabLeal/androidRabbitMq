@@ -37,17 +37,10 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        subscribe()
-        rawJSON()
-//        run("https://api.github.com/users/Evin1-/repos")
 
-    }
 
-    fun sendPostRequest(tipoinvestimento:String, rentabilidade:String,  prazo:String,) {
-//        Fuel.post("https://httpbin.org/post")
-//            .jsonBody("{ \"foo\" : \"bar\" }")
-//            .also {  }
-//            .response { result -> }
+//      run("https://api.github.com/users/Evin1-/repos")
+        subscribe("tesouro/11,73%/R\$ 31,74")
     }
 
     fun rawJSON() {
@@ -62,9 +55,8 @@ class MainActivity : AppCompatActivity() {
 
         // Create JSON using JSONObject
         val jsonObject = JSONObject()
-        jsonObject.put("tipoinvestimento", "10")
-        jsonObject.put("rentabilidade", "3540")
-        jsonObject.put("prazo", "23")
+        jsonObject.put("fila", "tesouro/11,59%/R\$ 38,28")
+
 
         // Convert JSONObject to String
         val jsonObjectString = jsonObject.toString()
@@ -89,7 +81,7 @@ class MainActivity : AppCompatActivity() {
                     )
 
                     Log.d("Pretty Printed JSON :", prettyJson)
-
+                    subscribe(prettyJson)
                 } else {
 
                     Log.e("RETROFIT_ERROR", response.code().toString())
@@ -103,8 +95,8 @@ class MainActivity : AppCompatActivity() {
 
 
     fun sendMessage(view: View) {
-        Log.d("TESTE", "CLICOOOOOu")
-        sendPostRequest("2","3","4")
+        Log.d("TESTE", "CLICOOOOOU")
+        rawJSON()
     }
 
     fun run(url: String) {
@@ -118,7 +110,7 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    fun subscribe() {
+    private fun subscribe(queu: String) {
 
         var subscribeThread = Thread {
             while (true) {
@@ -140,11 +132,11 @@ class MainActivity : AppCompatActivity() {
                     val cancelCallback = CancelCallback { consumerTag: String? ->
                         println("[$consumerTag] was canceled")
                     }
+                    println(queu)
+                   // while (true) {
+                    channel.basicConsume("tesouro/11,73%/R\$ 31,74", true, deliverCallback, cancelCallback)
 
-                    while (true) {
-                        channel.basicConsume("cdb", true, deliverCallback, cancelCallback)
-
-                    }
+                   // }
                 } catch (e: InterruptedException) {
                     break
                 } catch (e1: Exception) {
