@@ -1,19 +1,15 @@
 package com.example.appinvest
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Handler
-import android.os.Message
 import android.util.Log
 import android.view.View
+import android.widget.ArrayAdapter
+import android.widget.EditText
+import android.widget.Spinner
+import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonParser
 import com.rabbitmq.client.*
-import java.lang.Exception
-import java.nio.charset.StandardCharsets
-import com.rabbitmq.client.DeliverCallback
-
-import com.rabbitmq.client.ConnectionFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -21,31 +17,70 @@ import kotlinx.coroutines.withContext
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
+import org.chromium.base.Promise
 import org.json.JSONObject
 import retrofit2.Retrofit
-import java.io.BufferedReader
-import java.io.IOException
-import java.io.InputStreamReader
-import java.io.OutputStreamWriter
-import java.net.HttpURLConnection
-import java.net.URL
-import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
+import java.security.AccessController.getContext
+
 
 class MainActivity : AppCompatActivity() {
     private val client = OkHttpClient()
+    var tipoInvestimento: Spinner? = null
+    var rendabilidade: Spinner? = null
+    var aplicacaoMinima: Spinner? = null
+    var periodo: Spinner? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        subscribe("tesouro/11,81%/R\$ 633,36")
+        //GET TEXT INPUT
+
+        tipoInvestimento = findViewById<Spinner>(R.id.spinner1) as Spinner
+        rendabilidade = findViewById<Spinner>(R.id.spinner2) as Spinner
+        aplicacaoMinima = findViewById<Spinner>(R.id.spinner3) as Spinner
+        periodo = findViewById<Spinner>(R.id.spinner4) as Spinner
+
+        val itemTipoInvestimento = resources.getStringArray(R.array.tipo_investimento)
+        val itemRentabilidade = resources.getStringArray(R.array.rentabilidade)
+        val itemAplicacaoMinima = resources.getStringArray(R.array.aplicacao)
+        val itemPeriodo = resources.getStringArray(R.array.periodo)
+
+
+        if (tipoInvestimento != null) {
+            val adapter = ArrayAdapter(this,
+                android.R.layout.simple_spinner_item, itemTipoInvestimento)
+            tipoInvestimento?.adapter = adapter
+        }
+
+        if (rendabilidade != null) {
+            val adapter = ArrayAdapter(this,
+                android.R.layout.simple_spinner_item, itemRentabilidade)
+            rendabilidade?.adapter = adapter
+        }
+
+        if (aplicacaoMinima != null) {
+            val adapter = ArrayAdapter(this,
+                android.R.layout.simple_spinner_item, itemAplicacaoMinima)
+            aplicacaoMinima?.adapter = adapter
+        }
+
+        if (periodo != null) {
+            val adapter = ArrayAdapter(this,
+                android.R.layout.simple_spinner_item, itemPeriodo)
+            periodo?.adapter = adapter
+        }
+
     }
 
-    fun rawJSON() {
+    fun rawJSON(queue: String) : Promise<Boolean> {
+
+       var isCreateQueue: Boolean = false
 
         // Create Retrofit
         val retrofit = Retrofit.Builder()
-            .baseUrl("http://172.26.80.1:3000/")
+            .baseUrl("http://172.20.32.1:3000/")
             .build()
 
         // Create Service
@@ -53,7 +88,7 @@ class MainActivity : AppCompatActivity() {
 
         // Create JSON using JSONObject
         val jsonObject = JSONObject()
-        jsonObject.put("fila", "tesouro/11,81%/R\$ 633,36")
+        jsonObject.put("fila", queue)
 
 
         // Convert JSONObject to String
@@ -62,7 +97,7 @@ class MainActivity : AppCompatActivity() {
         // Create RequestBody ( We're not using any converter, like GsonConverter, MoshiConverter e.t.c, that's why we use RequestBody )
         val requestBody = jsonObjectString.toRequestBody("application/json".toMediaTypeOrNull())
 
-        CoroutineScope(Dispatchers.IO).launch {
+         CoroutineScope(Dispatchers.IO).launch {
             // Do the POST request and get response
             val response = service.createEmployee(requestBody = requestBody)
 
@@ -77,35 +112,32 @@ class MainActivity : AppCompatActivity() {
                                 ?.string() // About this thread blocking annotation : https://github.com/square/retrofit/issues/3255
                         )
                     )
-
+                    isCreateQueue = true
                     Log.d("Pretty Printed JSON :", prettyJson)
-                    subscribe(prettyJson)
+
+
                 } else {
 
                     Log.e("RETROFIT_ERROR", response.code().toString())
-
+                    isCreateQueue = false
                 }
             }
         }
+
+       return  Promise.fulfilled(true)
+
     }
 
 
 
 
     fun sendMessage(view: View) {
-        Log.d("TESTE", "CLICOOOOOU")
-        rawJSON()
-    }
+        var fila : String = "${tipoInvestimento?.selectedItem.toString()}/${rendabilidade?.selectedItem.toString()}/${aplicacaoMinima?.selectedItem.toString()}/${periodo?.selectedItem.toString()}"
 
-    fun run(url: String) {
-        val request = Request.Builder()
-            .url(url)
-            .build()
+        rawJSON(fila).then { queue ->
+            if(queue) subscribe(fila)
+        }
 
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {}
-            override fun onResponse(call: Call, response: Response) = println(response.body?.string())
-        })
     }
 
     private fun subscribe(queu: String) {
@@ -115,7 +147,7 @@ class MainActivity : AppCompatActivity() {
                 try {
 
                     val factory = ConnectionFactory()
-                    factory.host = "172.26.80.1".toString()
+                    factory.host = "172.20.32.1".toString()
 
                     val connection = factory.newConnection("amqp://guest:guest@172.20.32.1:5672/")
                     val channel = connection.createChannel()

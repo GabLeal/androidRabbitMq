@@ -1,4 +1,29 @@
 <resources>
     <string name="app_name">appinvest</string>
     <string name="button_text">publish</string>
+    <string-array name="tipo_investimento">
+        <item>cdb</item>
+        <item>tesouro</item>
+    </string-array>
+    <string-array name="rentabilidade">
+        <item>10</item>
+        <item>25</item>
+        <item>50</item>
+        <item>75</item>
+        <item>100</item>
+        <item>100+</item>
+    </string-array>
+    <string-array name="aplicacao">
+        <item>100</item>
+        <item>500</item>
+        <item>1000</item>
+        <item>5000</item>
+        <item>5000+</item>
+    </string-array>
+    <string-array name="periodo">
+        <item>d</item>
+        <item>1</item>
+        <item>5</item>
+        <item>5+</item>
+    </string-array>
 </resources>
