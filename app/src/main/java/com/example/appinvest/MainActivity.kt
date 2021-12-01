@@ -128,9 +128,6 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-
-
-
     fun sendMessage(view: View) {
         var fila : String = "${tipoInvestimento?.selectedItem.toString()}/${rendabilidade?.selectedItem.toString()}/${aplicacaoMinima?.selectedItem.toString()}/${periodo?.selectedItem.toString()}"
 
