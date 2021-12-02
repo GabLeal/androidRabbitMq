@@ -1,5 +1,12 @@
 package com.example.appinvest
 
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -7,6 +14,8 @@ import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.Spinner
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonParser
 import com.rabbitmq.client.*
@@ -17,11 +26,14 @@ import kotlinx.coroutines.withContext
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.internal.notify
 import org.chromium.base.Promise
 import org.json.JSONObject
 import retrofit2.Retrofit
 import java.nio.charset.StandardCharsets
 import java.security.AccessController.getContext
+import java.util.*
+import kotlin.random.Random.Default.nextInt
 
 
 class MainActivity : AppCompatActivity() {
@@ -32,6 +44,10 @@ class MainActivity : AppCompatActivity() {
     var periodo: Spinner? = null
     var precoatual: Spinner? = null
     var dividendoyield: Spinner? = null
+
+    private val CHANNEL_ID = "channel_id_example_01"
+    private var notificationId = 101
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -89,6 +105,36 @@ class MainActivity : AppCompatActivity() {
             dividendoyield?.adapter = adapter
         }
 
+        createNotificationChannel()
+
+    }
+
+    private fun createNotificationChannel(){
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            val name = "Notification title"
+            val descriptionText = "Notification Description"
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
+                description = descriptionText
+            }
+
+            val notificationManager: NotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
+
+    private fun sendNotification(title: String, description: String, notificationId : Int){
+        val builder = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setContentText(title)
+            .setContentText(description)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+
+        with(NotificationManagerCompat.from(this)){
+            notify(notificationId, builder.build())
+        }
+
+
     }
 
     fun rawJSON(queue: String) : Promise<Boolean> {
@@ -145,7 +191,6 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-
     fun sendMessage(view: View) {
         var fila : String = ""
         if (tipoInvestimento?.selectedItem.toString().equals("fundos imobiliarios")){
@@ -177,7 +222,9 @@ class MainActivity : AppCompatActivity() {
                     val deliverCallback = DeliverCallback { consumerTag: String?, delivery: Delivery ->
                         val message = String(delivery.body, StandardCharsets.UTF_8)
                         println("[$consumerTag] Received message: '$message'")
+                        val answer = JSONObject("""$message""")
 
+                        sendNotification(answer.getString("tipo_investimento"),"Você tem uma nova oferta do tipo "+ answer.getString("tipo_investimento"), (0..100).random())
 
 
                     }
