@@ -30,22 +30,27 @@ class MainActivity : AppCompatActivity() {
     var rendabilidade: Spinner? = null
     var aplicacaoMinima: Spinner? = null
     var periodo: Spinner? = null
+    var precoatual: Spinner? = null
+    var dividendoyield: Spinner? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         //GET TEXT INPUT
-
         tipoInvestimento = findViewById<Spinner>(R.id.spinner1) as Spinner
         rendabilidade = findViewById<Spinner>(R.id.spinner2) as Spinner
         aplicacaoMinima = findViewById<Spinner>(R.id.spinner3) as Spinner
         periodo = findViewById<Spinner>(R.id.spinner4) as Spinner
+        precoatual = findViewById<Spinner>(R.id.spinner5) as Spinner
+        dividendoyield = findViewById<Spinner>(R.id.spinner6) as Spinner
 
         val itemTipoInvestimento = resources.getStringArray(R.array.tipo_investimento)
         val itemRentabilidade = resources.getStringArray(R.array.rentabilidade)
         val itemAplicacaoMinima = resources.getStringArray(R.array.aplicacao)
         val itemPeriodo = resources.getStringArray(R.array.periodo)
+        val itemPrecoAtual = resources.getStringArray(R.array.preco_atual)
+        val itemDividendoYield = resources.getStringArray(R.array.dividendo_yuild)
 
 
         if (tipoInvestimento != null) {
@@ -70,6 +75,18 @@ class MainActivity : AppCompatActivity() {
             val adapter = ArrayAdapter(this,
                 android.R.layout.simple_spinner_item, itemPeriodo)
             periodo?.adapter = adapter
+        }
+
+        if (precoatual != null) {
+            val adapter = ArrayAdapter(this,
+                android.R.layout.simple_spinner_item, itemPrecoAtual)
+            precoatual?.adapter = adapter
+        }
+
+        if (dividendoyield != null) {
+            val adapter = ArrayAdapter(this,
+                android.R.layout.simple_spinner_item, itemDividendoYield)
+            dividendoyield?.adapter = adapter
         }
 
     }
@@ -128,8 +145,16 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+
     fun sendMessage(view: View) {
-        var fila : String = "${tipoInvestimento?.selectedItem.toString()}/${rendabilidade?.selectedItem.toString()}/${aplicacaoMinima?.selectedItem.toString()}/${periodo?.selectedItem.toString()}"
+        var fila : String = ""
+        if (tipoInvestimento?.selectedItem.toString().equals("fundos imobiliarios")){
+            fila = "fundos/${precoatual?.selectedItem.toString()}/${dividendoyield?.selectedItem.toString()}"
+        }else if(tipoInvestimento?.selectedItem.toString().equals("tesouro")){
+            fila = "${tipoInvestimento?.selectedItem.toString()}/${rendabilidade?.selectedItem.toString()}/${aplicacaoMinima?.selectedItem.toString()}"
+        } else{
+            fila = "${tipoInvestimento?.selectedItem.toString()}/${rendabilidade?.selectedItem.toString()}/${aplicacaoMinima?.selectedItem.toString()}/${periodo?.selectedItem.toString()}"
+        }
 
         rawJSON(fila).then { queue ->
             if(queue) subscribe(fila)
@@ -159,7 +184,7 @@ class MainActivity : AppCompatActivity() {
                     val cancelCallback = CancelCallback { consumerTag: String? ->
                         println("[$consumerTag] was canceled")
                     }
-                    println(queu)
+
                    while (true) {
                     channel.basicConsume(queu, true, deliverCallback, cancelCallback)
 
